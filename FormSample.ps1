@@ -8,7 +8,7 @@ $inputXML = @"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" x:Class="WpfApp2.MainWindow"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" WindowStyle="None" ResizeMode="NoResize">
     <Grid Background="#FFAEBEE8">
@@ -24,7 +24,7 @@ $inputXML = @"
 </Window>
 "@ 
  
-$inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
+$inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window' -replace 'x:Class=".*?"', ''
 
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [System.Reflection.Assembly]::LoadFrom("$ScriptRoot\Xceed.Wpf.Toolkit.dll")
@@ -61,13 +61,12 @@ Function Get-FormVariables
  
 #Get-FormVariables
 
-$WPFCalendar.DisplayDateStart = (Get-Date)
+$WPFCalendar.DisplayDateStart = Get-Date
 $WPFCalendar.SelectedDate = Get-Date
 $WPFCalendar.DisplayDateEnd = (Get-Date).AddDays(4)
 $WPFradioButtonSchedule.IsChecked = $True
-
-
 $WPFTimePicker.Value = (Get-Date).AddHours(1)
+
 
 $WPFradioButtonSchedule.Add_Checked( {
         $WPFtextBlock.Text = "This is a test. Please replace when another button is clicked Please Note"
@@ -76,7 +75,6 @@ $WPFradioButtonSchedule.Add_Checked( {
         $WPFTimePicker.IsEnabled = $true
 
     })
-
 
 $WPFradioButtonDismiss.Add_Checked( {
         $WPFtextBlock.Text = "Dismiss"
@@ -103,7 +101,6 @@ $WPFbutton.Add_Click( {
             }
             Else
             {
-                
                 $Script:DateSelected = $WPFCalendar.SelectedDate.ToShortDateString()
                 $Script:TimeSelected = $WPFTimePicker.Value.ToShortTimeString()
                 $Form.Close()
@@ -111,25 +108,19 @@ $WPFbutton.Add_Click( {
         } 
         Else
         { 
-
             $Script:DateSelected = (Get-Date).AddDays(1).ToShortDateString() 
             $Script:TimeSelected = (Get-Date).ToShortTimeString() 
-   
-
             $Form.Close()
         }
-    
         
     })
 
 $WPFCalendar.Add_SelectedDatesChanged( {
         $WPFradioButtonSchedule.CaptureMouse()
-  
     })
 
 $Form.Add_MouseLeftButtonDown( {
         $Form.DragMove()
-
     })
 
 
