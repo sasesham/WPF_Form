@@ -1,3 +1,5 @@
+$ScriptRoot = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+
 #Your XAML goes here :)
 $inputXML = @"
 <Window
@@ -6,6 +8,7 @@ $inputXML = @"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp2"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800" WindowStyle="None" ResizeMode="NoResize">
     <Grid Background="#FFAEBEE8">
@@ -15,15 +18,17 @@ $inputXML = @"
         <RadioButton x:Name="radioButtonInstall" Content="RadioButton" HorizontalAlignment="Left" Margin="125,180,0,0" VerticalAlignment="Top"/>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="255,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="120" Width="264" FontFamily="Arial" FontSize="16" FontWeight="Bold"><Run Text="This is a testbox with test"/><LineBreak/><Run Text="Please replace when another button is clicked"/><LineBreak/><Run/><LineBreak/><Run Text="Please Note"/></TextBlock>
         <Button x:Name="button" Content="OK" HorizontalAlignment="Left" Margin="255,314,0,0" VerticalAlignment="Top" Width="252"/>
+        <xctk:TimePicker x:Name="TimePicker" HorizontalAlignment="Left" Margin="579,225,0,0" VerticalAlignment="Top" Width="179"/>
 
     </Grid>
 </Window>
-
-
 "@ 
  
 $inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
+
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
+[System.Reflection.Assembly]::LoadFrom("$ScriptRoot\Xceed.Wpf.Toolkit.dll")
+
 [xml]$XAML = $inputXML
 #Read XAML
  
@@ -54,17 +59,21 @@ Function Get-FormVariables
     get-variable WPF*
 }
  
-Get-FormVariables
+#Get-FormVariables
 
-$WPFCalendar.DisplayDateStart = (Get-Date).AddDays(-1)
+$WPFCalendar.DisplayDateStart = (Get-Date)
 $WPFCalendar.SelectedDate = Get-Date
 $WPFCalendar.DisplayDateEnd = (Get-Date).AddDays(4)
 $WPFradioButtonSchedule.IsChecked = $True
+
+
+$WPFTimePicker.Value = (Get-Date).AddHours(1)
 
 $WPFradioButtonSchedule.Add_Checked( {
         $WPFtextBlock.Text = "This is a test. Please replace when another button is clicked Please Note"
         $WPFTextBlock.Margin = "255,75,0,0"
         $WPFCalendar.IsEnabled = $true
+        $WPFTimePicker.IsEnabled = $true
 
     })
 
@@ -73,6 +82,7 @@ $WPFradioButtonDismiss.Add_Checked( {
         $WPFtextBlock.Text = "Dismiss"
         $WPFtextBlock.Margin = "255,125,0,0"
         $WPFCalendar.IsEnabled = $false
+        $WPFTimePicker.IsEnabled = $false
 
     })
 
@@ -80,11 +90,12 @@ $WPFradioButtonInstall.Add_Checked( {
         $WPFtextBlock.Text = "Install"
         $WPFtextBlock.Margin = "255,175,0,0"
         $WPFCalendar.IsEnabled = $false
+        $WPFTimePicker.IsEnabled = $false
     })
 
 $WPFbutton.Add_Click( {
 
-        If ($WPFCalendar.SelectedDate.ToShortDateString() -lt (Get-Date).ToShortDateString())
+        If ($WPFTimePicker.Value.ToShortTimeString() -lt (Get-Date).ToShortTimeString() -and $WPFTimePicker.IsEnabled -eq $True) 
         {
 
             Write-Host "You have selected a date in the past.  Please select a valid date"
@@ -95,6 +106,7 @@ $WPFbutton.Add_Click( {
             If ($WPFCalendar.IsEnabled -eq $True)
             {
                 $Script:DateSelected = $WPFCalendar.SelectedDate.ToShortDateString()
+                $Script:TimeSelected = $WPFTimePicker.Value.ToShortTimeString()
             }
             Else
             { 
@@ -119,5 +131,8 @@ $Form.Add_MouseLeftButtonDown( {
 
 $Form.ShowDialog() | out-null
 
+""
+
 $DateSelected
+$WPFTimePicker.Value.ToShortTimeString()
  
