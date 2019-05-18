@@ -110,17 +110,11 @@ $WPFbutton.Add_Click( {
             }
         } 
         Else
-        {
-            If ($WPFCalendar.IsEnabled -eq $True)
-            {
-                $Script:DateSelected = $WPFCalendar.SelectedDate.ToShortDateString()
-                $Script:TimeSelected = $WPFTimePicker.Value.ToShortTimeString()
-            }
-            Else
-            { 
-                $Script:DateSelected = (Get-Date).AddDays(1).ToShortDateString() 
-                $Script:TimeSelected = (Get-Date).ToShortTimeString() 
-            }
+        { 
+
+            $Script:DateSelected = (Get-Date).AddDays(1).ToShortDateString() 
+            $Script:TimeSelected = (Get-Date).ToShortTimeString() 
+   
 
             $Form.Close()
         }
