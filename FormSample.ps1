@@ -47,7 +47,7 @@ catch
 # Load XAML Objects In PowerShell
 #===========================================================================
   
-$xaml.SelectNodes("//*[@Name]") | % { "trying item $($_.Name)";
+$xaml.SelectNodes("//*[@Name]") | ForEach-Object { #"trying item $($_.Name)";
     try { Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name) -ErrorAction Stop }
     catch { throw }
 }
@@ -95,12 +95,20 @@ $WPFradioButtonInstall.Add_Checked( {
 
 $WPFbutton.Add_Click( {
 
-        If ($WPFTimePicker.Value.ToShortTimeString() -lt (Get-Date).ToShortTimeString() -and $WPFTimePicker.IsEnabled -eq $True) 
+        If ( $WPFCalendar.IsEnabled -eq $True) 
         {
-
-            Write-Host "You have selected a date in the past.  Please select a valid date"
-            [System.Windows.MessageBox]::Show( 'You have selected a time in the past, please select a valid time.', 'Invalid Date', 'OK', 'Error')
-        }
+            If ($WPFCalendar.SelectedDate.ToShortDateString() -le (Get-Date).ToShortDateString() -and $WPFTimePicker.Value.ToShortTimeString() -lt (Get-Date).ToShortTimeString())
+            {
+                [System.Windows.MessageBox]::Show( 'You have selected a date and time combination that is in the past, please select a valid date and time.', 'Invalid time', 'OK', 'Error')
+            }
+            Else
+            {
+                
+                $Script:DateSelected = $WPFCalendar.SelectedDate.ToShortDateString()
+                $Script:TimeSelected = $WPFTimePicker.Value.ToShortTimeString()
+                $Form.Close()
+            }
+        } 
         Else
         {
             If ($WPFCalendar.IsEnabled -eq $True)
@@ -111,7 +119,9 @@ $WPFbutton.Add_Click( {
             Else
             { 
                 $Script:DateSelected = (Get-Date).AddDays(1).ToShortDateString() 
+                $Script:TimeSelected = (Get-Date).ToShortTimeString() 
             }
+
             $Form.Close()
         }
     
@@ -134,5 +144,5 @@ $Form.ShowDialog() | out-null
 ""
 
 $DateSelected
-$WPFTimePicker.Value.ToShortTimeString()
+$TimeSelected
  
